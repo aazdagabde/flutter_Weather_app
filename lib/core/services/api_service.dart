@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user_model.dart';
+import '../../features/weather/models/weather_data_model.dart';
 
 class ApiService {
   final String _baseUrl = "http://10.0.2.2/backend_weather_app";
@@ -39,4 +40,40 @@ class ApiService {
       throw Exception(errorBody['message'] ?? 'Échec de l\'inscription.');
     }
   }
+
+  //obtenir les donnet de l api de open-meteo
+  Future<WeatherData> fetchWeather(double laltitude, double longitude) async {
+    final String weatherUrl =
+        "https://api.open-meteo.com/v1/forecast?latitude=$laltitude&longitude=$longitude&hourly=temperature_2m,weathercode";
+    final response = await http.get(Uri.parse(weatherUrl));
+    if (response.statusCode == 200) {
+      return WeatherData.fromJson(jsonDecode(response.body));
+    } else {
+      throw Exception('Impossible de charger les donnéés météo');
+    }
+  }
+
+  // Cette méthode récupère les coordonnées d'une ville
+  Future<Map<String, double>> getCoordinates(String cityName) async {
+    final String geocodingUrl =
+        "https://geocoding-api.open-meteo.com/v1/search?name=$cityName&count=1";
+    final response = await http.get(Uri.parse(geocodingUrl));
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      if (data['results'] != null && data['results'].isNotEmpty) {
+        final location = data['results'][0];
+        return {
+          'latitude': location['latitude'],
+          'longitude': location['longitude'],
+        };
+      } else {
+        throw Exception('Ville non trouvée.');
+      }
+    } else {
+      throw Exception('Erreur de géocodage.');
+    }
+  }
+
+  Future<void> addFavorite(userId, cityName) async {}
 }

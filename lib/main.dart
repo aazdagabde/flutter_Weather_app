@@ -18,8 +18,8 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        //ChangeNotifierProvider(create: (_) => WeatherProvider()),
-        //ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+        ChangeNotifierProvider(create: (_) => WeatherProvider()),
+        // ChangeNotifierProvider(create: (_) => FavoritesProvider()),
         //ChangeNotifierProvider(create: (_) => HistoryProvider()),
       ],
       child: const MyApp(),
