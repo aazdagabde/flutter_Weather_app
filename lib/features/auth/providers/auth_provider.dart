@@ -22,14 +22,13 @@ class AuthProvider with ChangeNotifier {
 
     try {
       _user = await _apiService.login(username, password);
-      _isLoading = false;
 
 // --- AJOUT : Sauvegarder la session ---
       final prefs = await SharedPreferences.getInstance();
       prefs.setInt('userId', _user!.id);
       prefs.setString('username', _user!.username);
 // --- FIN DE L'AJOUT ---
-
+      _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
@@ -48,6 +47,7 @@ class AuthProvider with ChangeNotifier {
     try {
       await _apiService.register(username, password);
       _isLoading = false;
+      notifyListeners();
       return true;
     } catch (e) {
       print("ERREUR DANS REGISTER PROVIDER: $e");
