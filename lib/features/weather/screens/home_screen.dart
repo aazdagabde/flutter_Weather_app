@@ -183,96 +183,111 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      body: Consumer<WeatherProvider>(
-        builder: (context, weatherProvider, child) {
-          if (weatherProvider.isLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (weatherProvider.weatherData == null) {
-            return const Center(
-                child: Text("Recherchez une ville pour commencer."));
-          }
+      body: Container(
+        decoration: const BoxDecoration(
+          image: DecorationImage(
+            // On charge l'image depuis les assets
+            image: AssetImage("assets/images/bg.jpg"),
+            // On s'assure que l'image couvre tout l'écran
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: Consumer<WeatherProvider>(
+          builder: (context, weatherProvider, child) {
+            if (weatherProvider.isLoading) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (weatherProvider.weatherData == null) {
+              return const Center(
+                  child: Text("Recherchez une ville pour commencer."));
+            }
 
-          final now = DateTime.now();
-          final hourlyData = weatherProvider.weatherData!.hourly;
+            final now = DateTime.now();
+            final hourlyData = weatherProvider.weatherData!.hourly;
 
-          int futureIndex =
-              hourlyData.time.indexWhere((time) => time.isAfter(now));
-          int currentIndex = (futureIndex == -1)
-              ? hourlyData.time.length - 1
-              : (futureIndex > 0 ? futureIndex - 1 : 0);
+            int futureIndex =
+                hourlyData.time.indexWhere((time) => time.isAfter(now));
+            int currentIndex = (futureIndex == -1)
+                ? hourlyData.time.length - 1
+                : (futureIndex > 0 ? futureIndex - 1 : 0);
 
-          final currentTemp = hourlyData.temperatures[currentIndex];
-          final currentCode = hourlyData.weatherCodes[currentIndex];
-          final weatherDescription =
-              WeatherUtils.getWeatherDescription(currentCode);
-          final weatherIcon = WeatherUtils.getWeatherIcon(currentCode);
+            final currentTemp = hourlyData.temperatures[currentIndex];
+            final currentCode = hourlyData.weatherCodes[currentIndex];
+            final weatherDescription =
+                WeatherUtils.getWeatherDescription(currentCode);
+            final weatherIcon = WeatherUtils.getWeatherIcon(currentCode);
 
-          return RefreshIndicator(
-            onRefresh: () async {
-              if (userId != null) {
-                await Provider.of<WeatherProvider>(context, listen: false)
-                    .fetchWeatherByCity(weatherProvider.currentCity, userId);
-              }
-            },
-            child: ListView(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 50.0, horizontal: 16.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(weatherProvider.currentCity,
-                          style: Theme.of(context).textTheme.headlineMedium),
-                      const SizedBox(height: 10),
-                      Icon(weatherIcon, size: 80, color: Colors.orangeAccent),
-                      const SizedBox(height: 10),
-                      Text("${currentTemp.toStringAsFixed(1)}°C",
-                          style: Theme.of(context).textTheme.displayLarge),
-                      const SizedBox(height: 5),
-                      Text(weatherDescription,
-                          style: Theme.of(context).textTheme.headlineSmall),
-                    ],
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Prévisions horaires",
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        height: 120,
-                        child: ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: 24,
-                          itemBuilder: (context, index) {
-                            final itemIndex = currentIndex + index;
-                            if (itemIndex >= hourlyData.time.length)
-                              return const SizedBox.shrink();
-                            return Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 4.0),
-                              child: HourlyForecastItem(
-                                time: hourlyData.time[itemIndex],
-                                temperature: hourlyData.temperatures[itemIndex],
-                                weatherCode: hourlyData.weatherCodes[itemIndex],
-                              ),
-                            );
-                          },
+            return RefreshIndicator(
+              onRefresh: () async {
+                if (userId != null) {
+                  await Provider.of<WeatherProvider>(context, listen: false)
+                      .fetchWeatherByCity(weatherProvider.currentCity, userId);
+                }
+              },
+              child: ListView(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 50.0, horizontal: 16.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const SizedBox(
+                          height: 100,
                         ),
-                      ),
-                    ],
+                        Text(weatherProvider.currentCity,
+                            style: Theme.of(context).textTheme.headlineMedium),
+                        const SizedBox(height: 10),
+                        Icon(weatherIcon, size: 80, color: Colors.orangeAccent),
+                        const SizedBox(height: 10),
+                        Text("${currentTemp.toStringAsFixed(1)}°C",
+                            style: Theme.of(context).textTheme.displayLarge),
+                        const SizedBox(height: 5),
+                        Text(weatherDescription,
+                            style: Theme.of(context).textTheme.headlineSmall),
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Prévisions horaires",
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          height: 120,
+                          child: ListView.builder(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: 24,
+                            itemBuilder: (context, index) {
+                              final itemIndex = currentIndex + index;
+                              if (itemIndex >= hourlyData.time.length)
+                                return const SizedBox.shrink();
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 4.0),
+                                child: HourlyForecastItem(
+                                  time: hourlyData.time[itemIndex],
+                                  temperature:
+                                      hourlyData.temperatures[itemIndex],
+                                  weatherCode:
+                                      hourlyData.weatherCodes[itemIndex],
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

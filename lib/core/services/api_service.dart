@@ -37,8 +37,15 @@ class ApiService {
       return;
     } else {
       // Si ça échoue, on récupère le message d'erreur de l'API.
-      final errorBody = jsonDecode(response.body);
-      throw Exception(errorBody['message'] ?? 'Échec de l\'inscription.');
+      if (response.statusCode > 499 || response.statusCode < 599) {
+        final errorBody = jsonDecode(response.body);
+
+        throw Exception(
+            errorBody['message'] ?? 'nom d utilisateur déja existe');
+      } else {
+        final errorBody = jsonDecode(response.body);
+        throw Exception(errorBody['message'] ?? 'Échec de l\'inscription.');
+      }
     }
   }
 

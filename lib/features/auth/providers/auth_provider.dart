@@ -10,8 +10,14 @@ class AuthProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _user != null;
+
+  String? _errorMessage;
+  String? get errorMessage => _errorMessage;
+
   Future<bool> login(String username, String password) async {
     _isLoading = true;
+    _errorMessage = null; // Réinitialiser l'erreur
+
     notifyListeners();
 
     try {
@@ -27,7 +33,7 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      print("ERREUR ATTRAPÉE DANS AUTHPROVIDER: $e");
+      _errorMessage = e.toString();
       _isLoading = false;
 
       notifyListeners();
