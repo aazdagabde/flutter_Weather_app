@@ -8,6 +8,7 @@ import '../../history/providers/history_provider.dart';
 import '../providers/weather_provider.dart';
 
 // Screens
+import '../../auth/screens/splash_screen.dart';
 import '../../favorites/screens/favorites_screen.dart';
 import '../../history/screens/history_screen.dart';
 
@@ -54,28 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Météo Now"),
+        // --- LA SECTION "ACTIONS" EST DE RETOUR ---
         actions: [
-          IconButton(
-            icon: const Icon(Icons.history),
-            tooltip: "Voir l'historique",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const HistoryScreen()),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.folder_special),
-            tooltip: "Voir les favoris",
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => const FavoritesScreen()),
-              );
-            },
-          ),
           Consumer2<FavoritesProvider, WeatherProvider>(
             builder: (context, favoritesProvider, weatherProvider, child) {
               if (weatherProvider.currentCity.isEmpty) {
@@ -109,7 +90,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: const InputDecoration(
                       hintText: "Rechercher une ville...",
                       border: InputBorder.none,
+                      hintStyle: TextStyle(color: Colors.black),
                     ),
+                    style: const TextStyle(color: Colors.black87),
                     onSubmitted: (value) {
                       if (value.isNotEmpty && userId != null) {
                         Provider.of<WeatherProvider>(context, listen: false)
@@ -120,7 +103,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.search),
+                  icon: const Icon(Icons.search, color: Colors.black),
                   onPressed: () {
                     if (_searchController.text.isNotEmpty && userId != null) {
                       Provider.of<WeatherProvider>(context, listen: false)
@@ -130,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.my_location),
+                  icon: const Icon(Icons.my_location, color: Colors.black),
                   tooltip: "Météo de ma position",
                   onPressed: () {
                     if (userId != null) {
@@ -143,6 +126,60 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            DrawerHeader(
+              decoration: const BoxDecoration(color: Colors.blue),
+              child: Text(
+                'Météo Now',
+                style: Theme.of(context)
+                    .textTheme
+                    .headlineSmall
+                    ?.copyWith(color: Colors.white),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.favorite),
+              title: const Text('Mes Favoris'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const FavoritesScreen()));
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: const Text('Mon Historique'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const HistoryScreen()));
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout),
+              title: const Text('Déconnexion'),
+              onTap: () async {
+                await Provider.of<AuthProvider>(context, listen: false)
+                    .logout();
+                if (mounted) {
+                  Navigator.of(context).pushAndRemoveUntil(
+                      MaterialPageRoute(
+                          builder: (context) => const SplashScreen()),
+                      (route) => false);
+                }
+              },
+            ),
+          ],
         ),
       ),
       body: Consumer<WeatherProvider>(

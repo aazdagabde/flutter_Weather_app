@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/models/user_model.dart';
 import '../../../core/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -16,6 +17,13 @@ class AuthProvider with ChangeNotifier {
     try {
       _user = await _apiService.login(username, password);
       _isLoading = false;
+
+// --- AJOUT : Sauvegarder la session ---
+      final prefs = await SharedPreferences.getInstance();
+      prefs.setInt('userId', _user!.id);
+      prefs.setString('username', _user!.username);
+// --- FIN DE L'AJOUT ---
+
       notifyListeners();
       return true;
     } catch (e) {
@@ -40,5 +48,27 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
       return false;
     }
+  }
+
+  // Nouvelle méthode pour tenter une connexion automatique
+  Future<bool> tryAutoLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!prefs.containsKey('userId')) {
+      return false;
+    }
+
+    final userId = prefs.getInt('userId');
+    final username = prefs.getString('username');
+    _user = User(id: userId!, username: username!);
+    notifyListeners();
+    return true;
+  }
+
+// Nouvelle méthode pour la déconnexion
+  Future<void> logout() async {
+    _user = null;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    prefs.clear(); // Supprime toutes les données sauvegardées
   }
 }
