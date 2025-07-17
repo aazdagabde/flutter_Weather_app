@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../auth/providers/auth_provider.dart';
 import '../providers/favorites_provider.dart';
 import '../../weather/providers/weather_provider.dart';
 
@@ -26,10 +27,21 @@ class FavoritesScreen extends StatelessWidget {
                 title: Text(city),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  // Au clic, on cherche la météo de cette ville et on revient à l'accueil
-                  Provider.of<WeatherProvider>(context, listen: false)
-                      .fetchWeatherByCity(city);
-                  Navigator.of(context).pop();
+                  // 1. Récupérer l'ID de l'utilisateur connecté
+                  final userId =
+                      Provider.of<AuthProvider>(context, listen: false)
+                          .user
+                          ?.id;
+
+                  // 2. Vérifier que l'utilisateur est bien connecté
+                  if (userId != null) {
+                    // 3. Appeler la fonction avec les DEUX arguments
+                    Provider.of<WeatherProvider>(context, listen: false)
+                        .fetchWeatherByCity(city, userId);
+
+                    // 4. Revenir à l'écran d'accueil
+                    Navigator.of(context).pop();
+                  }
                 },
               );
             },

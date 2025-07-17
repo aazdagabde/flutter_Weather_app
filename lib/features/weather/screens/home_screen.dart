@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+// Providers
 import '../../auth/providers/auth_provider.dart';
 import '../../favorites/providers/favorites_provider.dart';
-import '../../favorites/screens/favorites_screen.dart';
+import '../../history/providers/history_provider.dart';
 import '../providers/weather_provider.dart';
+
+// Screens
+import '../../favorites/screens/favorites_screen.dart';
+import '../../history/screens/history_screen.dart';
+
+// Widgets & Utils
 import '../widgets/hourly_forecast_item.dart';
 import '../../../core/utils/weather_utils.dart';
 
@@ -26,23 +33,38 @@ class _HomeScreenState extends State<HomeScreen> {
       final userId = authProvider.user?.id;
 
       if (userId != null) {
-        // Charger la météo initiale pour Casablanca
         Provider.of<WeatherProvider>(context, listen: false)
-            .fetchWeatherByCity("Casablanca");
-        // Charger la liste des favoris de l'utilisateur
+            .fetchWeatherByCity("Casablanca", userId);
         Provider.of<FavoritesProvider>(context, listen: false)
             .fetchFavorites(userId);
+        Provider.of<HistoryProvider>(context, listen: false)
+            .fetchHistory(userId);
       }
     });
   }
 
+  void _unfocus() {
+    FocusScope.of(context).unfocus();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userId = Provider.of<AuthProvider>(context, listen: false).user?.id;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Météo Now"),
         actions: [
-          // Bouton pour voir la liste des favoris
+          IconButton(
+            icon: const Icon(Icons.history),
+            tooltip: "Voir l'historique",
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const HistoryScreen()),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.folder_special),
             tooltip: "Voir les favoris",
@@ -54,26 +76,18 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          // Bouton pour ajouter/supprimer le favori actuel
           Consumer2<FavoritesProvider, WeatherProvider>(
             builder: (context, favoritesProvider, weatherProvider, child) {
               if (weatherProvider.currentCity.isEmpty) {
-                return const SizedBox
-                    .shrink(); // Ne rien afficher si aucune ville n'est chargée
+                return const SizedBox.shrink();
               }
-
               final isFavorite =
                   favoritesProvider.isFavorite(weatherProvider.currentCity);
-
               return IconButton(
                 icon: Icon(isFavorite ? Icons.star : Icons.star_border),
                 tooltip:
                     isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
                 onPressed: () {
-                  final userId =
-                      Provider.of<AuthProvider>(context, listen: false)
-                          .user
-                          ?.id;
                   if (userId != null) {
                     favoritesProvider.toggleFavorite(
                         userId, weatherProvider.currentCity);
@@ -97,9 +111,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       border: InputBorder.none,
                     ),
                     onSubmitted: (value) {
-                      if (value.isNotEmpty) {
+                      if (value.isNotEmpty && userId != null) {
                         Provider.of<WeatherProvider>(context, listen: false)
-                            .fetchWeatherByCity(value);
+                            .fetchWeatherByCity(value, userId);
+                        _unfocus();
                       }
                     },
                   ),
@@ -107,9 +122,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 IconButton(
                   icon: const Icon(Icons.search),
                   onPressed: () {
-                    if (_searchController.text.isNotEmpty) {
+                    if (_searchController.text.isNotEmpty && userId != null) {
                       Provider.of<WeatherProvider>(context, listen: false)
-                          .fetchWeatherByCity(_searchController.text);
+                          .fetchWeatherByCity(_searchController.text, userId);
+                      _unfocus();
                     }
                   },
                 ),
@@ -117,8 +133,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   icon: const Icon(Icons.my_location),
                   tooltip: "Météo de ma position",
                   onPressed: () {
-                    Provider.of<WeatherProvider>(context, listen: false)
-                        .fetchWeatherForCurrentLocation();
+                    if (userId != null) {
+                      Provider.of<WeatherProvider>(context, listen: false)
+                          .fetchWeatherForCurrentLocation(userId);
+                      _unfocus();
+                    }
                   },
                 )
               ],
@@ -131,7 +150,6 @@ class _HomeScreenState extends State<HomeScreen> {
           if (weatherProvider.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-
           if (weatherProvider.weatherData == null) {
             return const Center(
                 child: Text("Recherchez une ville pour commencer."));
@@ -152,12 +170,18 @@ class _HomeScreenState extends State<HomeScreen> {
               WeatherUtils.getWeatherDescription(currentCode);
           final weatherIcon = WeatherUtils.getWeatherIcon(currentCode);
 
-          return Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
+          return RefreshIndicator(
+            onRefresh: () async {
+              if (userId != null) {
+                await Provider.of<WeatherProvider>(context, listen: false)
+                    .fetchWeatherByCity(weatherProvider.currentCity, userId);
+              }
+            },
+            child: ListView(
               children: [
-                Expanded(
-                  flex: 2,
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                      vertical: 50.0, horizontal: 16.0),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -174,8 +198,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-                Expanded(
-                  flex: 1,
+                Padding(
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -190,10 +214,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemCount: 24,
                           itemBuilder: (context, index) {
                             final itemIndex = currentIndex + index;
-                            if (itemIndex >= hourlyData.time.length) {
+                            if (itemIndex >= hourlyData.time.length)
                               return const SizedBox.shrink();
-                            }
-
                             return Padding(
                               padding:
                                   const EdgeInsets.symmetric(horizontal: 4.0),

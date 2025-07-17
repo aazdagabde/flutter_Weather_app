@@ -132,7 +132,7 @@ class ApiService {
 
   Future<List<HistoryEntry>> getHistory(int userId) async {
     final response = await http.get(
-      Uri.parse('$_baseUrl/api/history/get.php?user_Id'),
+      Uri.parse('$_baseUrl/api/history/get.php?user_id=$userId'),
     );
     if (response.statusCode == 200) {
       List<dynamic> data = jsonDecode(response.body);
