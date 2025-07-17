@@ -133,7 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: const BoxDecoration(color: Colors.blue),
+              margin: EdgeInsets.only(top: 40),
+              decoration: const BoxDecoration(color: Colors.blueGrey),
               child: Text(
                 'Météo Now',
                 style: Theme.of(context)
