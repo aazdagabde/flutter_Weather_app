@@ -47,6 +47,7 @@ class AuthProvider with ChangeNotifier {
 
     try {
       await _apiService.register(username, password);
+      _isLoading = false;
       return true;
     } catch (e) {
       print("ERREUR DANS REGISTER PROVIDER: $e");

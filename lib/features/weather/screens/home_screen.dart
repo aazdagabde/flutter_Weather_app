@@ -54,7 +54,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Météo Now"),
+        backgroundColor: Colors.blueGrey,
+        title: const Text(
+          "Météo Now",
+          style: TextStyle(color: Colors.white),
+        ),
         // --- LA SECTION "ACTIONS" EST DE RETOUR ---
         actions: [
           Consumer2<FavoritesProvider, WeatherProvider>(
@@ -65,7 +69,10 @@ class _HomeScreenState extends State<HomeScreen> {
               final isFavorite =
                   favoritesProvider.isFavorite(weatherProvider.currentCity);
               return IconButton(
-                icon: Icon(isFavorite ? Icons.star : Icons.star_border),
+                icon: Icon(
+                  isFavorite ? Icons.star : Icons.star_border,
+                  color: Colors.white,
+                ),
                 tooltip:
                     isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris',
                 onPressed: () {
@@ -90,9 +97,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration: const InputDecoration(
                       hintText: "Rechercher une ville...",
                       border: InputBorder.none,
-                      hintStyle: TextStyle(color: Colors.black),
+                      hintStyle: TextStyle(color: Colors.white),
                     ),
-                    style: const TextStyle(color: Colors.black87),
+                    style: const TextStyle(color: Colors.white),
                     onSubmitted: (value) {
                       if (value.isNotEmpty && userId != null) {
                         Provider.of<WeatherProvider>(context, listen: false)
@@ -103,7 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(Icons.search, color: Colors.black),
+                  icon: const Icon(Icons.search, color: Colors.white),
                   onPressed: () {
                     if (_searchController.text.isNotEmpty && userId != null) {
                       Provider.of<WeatherProvider>(context, listen: false)
@@ -113,7 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
                 IconButton(
-                  icon: const Icon(Icons.my_location, color: Colors.black),
+                  icon: const Icon(Icons.my_location, color: Colors.white),
                   tooltip: "Météo de ma position",
                   onPressed: () {
                     if (userId != null) {
