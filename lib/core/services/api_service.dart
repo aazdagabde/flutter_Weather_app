@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import '../../features/history/models/history_entry_model.dart';
 import '../models/user_model.dart';
 import '../../features/weather/models/weather_data_model.dart';
 
@@ -111,6 +112,33 @@ class ApiService {
 
     if (response.statusCode != 204 && response.statusCode != 200) {
       throw Exception('Impossible de supprimer le favori.');
+    }
+  }
+
+  Future<void> addHistory(
+      int userId, String cityName, double temperature) async {
+    final response = await http.post(Uri.parse('$_baseUrl/api/history/add.php'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'user_id': userId,
+          'city_name': cityName,
+          'temperature': temperature,
+        }));
+
+    if (response.statusCode != 201) {
+      throw Exception('Impossible d\' ajouter à l\'historique.');
+    }
+  }
+
+  Future<List<HistoryEntry>> getHistory(int userId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/history/get.php?user_Id'),
+    );
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      return data.map((item) => HistoryEntry.fromJson(item)).toList();
+    } else {
+      throw Exception('Impossible de charger l\'historique .');
     }
   }
 }

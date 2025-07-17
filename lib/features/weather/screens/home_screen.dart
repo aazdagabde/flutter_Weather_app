@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+
 import '../../auth/providers/auth_provider.dart';
 import '../../favorites/providers/favorites_provider.dart';
 import '../../favorites/screens/favorites_screen.dart';
@@ -189,8 +190,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           itemCount: 24,
                           itemBuilder: (context, index) {
                             final itemIndex = currentIndex + index;
-                            if (itemIndex >= hourlyData.time.length)
+                            if (itemIndex >= hourlyData.time.length) {
                               return const SizedBox.shrink();
+                            }
 
                             return Padding(
                               padding:

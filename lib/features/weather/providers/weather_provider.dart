@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/services/api_service.dart';
 import '../models/weather_data_model.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class WeatherProvider with ChangeNotifier {
   final ApiService _apiService = ApiService();
@@ -10,12 +11,15 @@ class WeatherProvider with ChangeNotifier {
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
-  Future<void> fetchWeather(double lat, double lon) async {
+  Future<void> fetchWeather(double lat, double lon, int userId) async {
     _isLoading = true;
     notifyListeners();
 
     try {
       _weatherData = await _apiService.fetchWeather(lat, lon);
+      final currentTemp = _weatherData!.hourly.temperatures.first;
+      await _apiService.addHistory(userId, _currentCity, currentTemp);
+
       print(
           "Données météo reçues ! Température actuelle : ${_weatherData?.hourly.temperatures.first}°C");
     } catch (e) {
@@ -42,7 +46,8 @@ class WeatherProvider with ChangeNotifier {
       final lon = coords['longitude']!;
 
       // 2. Utiliser la méthode existante pour récupérer la météo
-      await fetchWeather(lat, lon);
+      // Remplacez "0" par l'identifiant utilisateur réel si disponible
+      await fetchWeather(lat, lon, 0);
       _currentCity = cityName; // Mettre à jour le nom de la ville
     } catch (e) {
       print("ERREUR fetchWeatherByCity: $e");
@@ -73,13 +78,22 @@ class WeatherProvider with ChangeNotifier {
 
           );
 
-      // 3. Récupérer le nom de la ville à partir des coordonnées (optionnel mais mieux)
-      // Vous pouvez créer une méthode getCityNameFromCoords dans votre ApiService si vous le souhaitez.
-      // Pour l'instant, on récupère juste la météo.
-      _currentCity = "Ma Position"; // Nom temporaire
+      // --- DÉBUT DE LA MODIFICATION ---
+
+      // 3. Obtenir le nom de la ville depuis les coordonnées
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+      String cityName = "Position Actuelle";
+      if (placemarks.isNotEmpty) {
+        // Le nom de la ville se trouve souvent dans "locality"
+        cityName = placemarks.first.locality ?? "Position Actuelle";
+      }
+      _currentCity = "$cityName (Ma Position)"; // On met à jour le nom
+
+      // --- FIN DE LA MODIFICATION ---
 
       // 4. Utiliser la méthode existante pour récupérer la météo
-      await fetchWeather(position.latitude, position.longitude);
+      await fetchWeather(position.latitude, position.longitude, 0);
     } catch (e) {
       print("ERREUR de géolocalisation: $e");
     }
