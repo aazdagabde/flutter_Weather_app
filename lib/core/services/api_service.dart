@@ -41,7 +41,7 @@ class ApiService {
     }
   }
 
-  //obtenir les donnet de l api de open-meteo
+  //obtenir les donnees de l api de open-meteo (api open source)
   Future<WeatherData> fetchWeather(double laltitude, double longitude) async {
     final String weatherUrl =
         "https://api.open-meteo.com/v1/forecast?latitude=$laltitude&longitude=$longitude&hourly=temperature_2m,weathercode";
@@ -53,7 +53,7 @@ class ApiService {
     }
   }
 
-  // Cette méthode récupère les coordonnées d'une ville
+  // Cette méthode récupère les coordonnées d'une ville (api open source)
   Future<Map<String, double>> getCoordinates(String cityName) async {
     final String geocodingUrl =
         "https://geocoding-api.open-meteo.com/v1/search?name=$cityName&count=1";

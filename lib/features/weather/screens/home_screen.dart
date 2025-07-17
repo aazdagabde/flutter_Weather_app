@@ -111,6 +111,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           .fetchWeatherByCity(_searchController.text);
                     }
                   },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.my_location),
+                  tooltip: "Météo de ma position",
+                  onPressed: () {
+                    Provider.of<WeatherProvider>(context, listen: false)
+                        .fetchWeatherForCurrentLocation();
+                  },
                 )
               ],
             ),
