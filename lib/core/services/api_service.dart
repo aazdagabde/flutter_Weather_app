@@ -75,5 +75,42 @@ class ApiService {
     }
   }
 
-  Future<void> addFavorite(userId, cityName) async {}
+  Future<List<String>> getFavorites(int userId) async {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/api/favorites/get.php?user_id=$userId'),
+    );
+
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      // On transforme la liste de maps en liste de strings
+      return data.map((item) => item['city_name'].toString()).toList();
+    } else {
+      throw Exception('Impossible de charger les favoris.');
+    }
+  }
+
+  Future<void> addFavorite(int userId, String cityName) async {
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/favorites/add.php'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': userId, 'city_name': cityName}),
+    );
+
+    if (response.statusCode != 201) {
+      throw Exception('Impossible d\'ajouter le favori.');
+    }
+  }
+
+  Future<void> removeFavorite(int userId, String cityName) async {
+    final response = await http.post(
+      // ou http.delete si vous avez configuré le serveur pour
+      Uri.parse('$_baseUrl/api/favorites/remove.php'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'user_id': userId, 'city_name': cityName}),
+    );
+
+    if (response.statusCode != 204 && response.statusCode != 200) {
+      throw Exception('Impossible de supprimer le favori.');
+    }
+  }
 }
