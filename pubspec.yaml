@@ -22,14 +22,16 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  # 1. AJOUT DU PACKAGE
+  flutter_launcher_icons: ^0.13.1
 
 flutter:
-  # La ligne suivante doit être alignée avec la ligne "assets:"
   uses-material-design: true
-
-  # --- DÉBUT DE LA CORRECTION ---
-  # Assurez-vous que "assets:" a deux espaces devant.
   assets:
-    # Assurez-vous que cette ligne a quatre espaces devant et se termine par un /
     - assets/images/
-  # --- FIN DE LA CORRECTION ---
+
+# 2. CONFIGURATION DU PACKAGE
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png" 
