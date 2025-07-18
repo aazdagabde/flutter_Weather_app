@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (userId != null) {
         Provider.of<WeatherProvider>(context, listen: false)
-            .fetchWeatherByCity("Casablanca", userId);
+            .fetchWeatherByCity("OUJDA", userId);
         Provider.of<FavoritesProvider>(context, listen: false)
             .fetchFavorites(userId);
         Provider.of<HistoryProvider>(context, listen: false)
@@ -140,7 +140,7 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              margin: EdgeInsets.only(top: 40),
+              margin: const EdgeInsets.only(top: 40),
               decoration: const BoxDecoration(color: Colors.blueGrey),
               child: Text(
                 'Météo Now',
@@ -180,6 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 await Provider.of<AuthProvider>(context, listen: false)
                     .logout();
                 if (mounted) {
+                  // ignore: use_build_context_synchronously
                   Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                           builder: (context) => const SplashScreen()),
@@ -271,8 +272,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             itemCount: 24,
                             itemBuilder: (context, index) {
                               final itemIndex = currentIndex + index;
-                              if (itemIndex >= hourlyData.time.length)
+                              if (itemIndex >= hourlyData.time.length) {
                                 return const SizedBox.shrink();
+                              }
                               return Padding(
                                 padding:
                                     const EdgeInsets.symmetric(horizontal: 4.0),

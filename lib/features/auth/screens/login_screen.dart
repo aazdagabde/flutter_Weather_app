@@ -235,7 +235,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           color: Colors.white.withOpacity(0.9),
                           fontSize: 14,
                         ),
-                        children: [
+                        children: const [
                           TextSpan(
                             text: "S'inscrire",
                             style: TextStyle(

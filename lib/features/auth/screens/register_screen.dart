@@ -84,18 +84,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   // Logo
                   Container(
                     padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
+                    /*decoration: BoxDecoration(
                       color: Colors.white.withOpacity(0.2),
                       shape: BoxShape.circle,
                       border: Border.all(
                         color: Colors.white,
                         width: 2,
                       ),
-                    ),
+                    ),*/
                     child: Image.asset(
                       'assets/images/logo.png',
-                      width: 80,
-                      height: 80,
+                      width: 150,
+                      height: 150,
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -282,7 +282,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: Colors.white.withOpacity(0.9),
                           fontSize: 14,
                         ),
-                        children: [
+                        children: const [
                           TextSpan(
                             text: "Se connecter",
                             style: TextStyle(
